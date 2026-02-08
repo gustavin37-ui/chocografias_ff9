@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Mapa Final Fantasy IX - Interactivo</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #222;
+            color: white;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- VISOR DEL MAPA --- */
+        .viewport {
+            flex-grow: 1;
+            overflow: auto; /* Permite scroll en ambas direcciones */
+            position: relative;
+            background-color: #000;
+            display: block; /* Cambiado de flex a block para evitar centrado forzoso */
+            -webkit-overflow-scrolling: touch; /* Scroll suave en móviles */
+        }
+
+        .map-container {
+            position: relative;
+            display: block;
+            /* Ancho fijo suficiente para que los puntos no se muevan */
+            width: 1200px; 
+            /* Importante: eliminamos márgenes automáticos */
+            margin: 0;
+        }
+
+        .map-container img {
+            display: block;
+            width: 100%;
+            height: auto;
+            pointer-events: none;
+        }
+
+        /* --- PUNTOS Y ETIQUETAS --- */
+        .pin {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Punto rojo visual */
+        .dot {
+            width: 16px; height: 16px;
+            background-color: #ff0000;
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 2px;
+        }
+
+        /* Etiqueta de texto */
+        .label {
+            background-color: white;
+            color: #c0392b;
+            border: 1px solid #c0392b;
+            padding: 1px 4px;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        /* ESTADO: ENCONTRADO */
+        .pin.found { opacity: 0.3; }
+        .pin.found .dot { background-color: #555; border-color: #888; }
+        .pin.found .label { text-decoration: line-through; background-color: #ccc; border-color: #555; color: #555; }
+
+        /* --- RESET --- */
+        .reset-icon {
+            position: fixed;
+            bottom: 20px; right: 20px;
+            background: #222;
+            border: 2px solid #fff;
+            color: #fff;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="viewport">
+        <div class="map-container" id="mapCont">
+            <img id="mapImg" src="https://i.ibb.co/DZYzgPx/imagen-vacia.png" alt="Mapa">
+
+            <div class="pin" id="p2" style="top: 29%; left: 83.5%;"><div class="dot"></div><span class="label">Isla Exterior 2</span></div>
+            <div class="pin" id="p3" style="top: 33%; left: 96%;"><div class="dot"></div><span class="label">Isla Exterior</span></div>
+            <div class="pin" id="p4" style="top: 38%; left: 75%;"><div class="dot"></div><span class="label">Playa Árida</span></div>
+            <div class="pin" id="p6" style="top: 59%; left: 91%;"><div class="dot"></div><span class="label">Mar Neblinoso</span></div>
+            <div class="pin" id="p8" style="top: 7%; left: 35%;"><div class="dot"></div><span class="label">Entrada Gélida</span></div>
+            <div class="pin" id="p10" style="top: 15%; left: 37%;"><div class="dot"></div><span class="label">Tierra Gélida</span></div>
+            <div class="pin" id="p11" style="top: 29%; left: 33.5%;"><div class="dot"></div><span class="label">Vado Olvidado</span></div>
+            <div class="pin" id="p12" style="top: 33%; left: 6%;"><div class="dot"></div><span class="label">Meseta Olvidada</span></div>
+            <div class="pin" id="p13" style="top: 45%; left: 10%;"><div class="dot"></div><span class="label">Vado Lejano</span></div>
+            <div class="pin" id="p15" style="top: 53%; left: 2%;"><div class="dot"></div><span class="label">Mar</span></div>
+            <div class="pin" id="p16" style="top: 59%; left: 14%;"><div class="dot"></div><span class="label">Meseta del Ocaso</span></div>
+            <div class="pin" id="p20" style="top: 33%; left: 47%;"><div class="dot"></div><span class="label">Isla Espectral</span></div>
+            <div class="pin" id="p21" style="top: 32%; left: 26%;"><div class="dot"></div><span class="label">Isla Olvidada</span></div>
+            <div class="pin" id="p22" style="top: 41%; left: 58%;"><div class="dot"></div><span class="label">Vado Sinuoso</span></div>
+            <div class="pin" id="p23" style="top: 55%; left: 30%;"><div class="dot"></div><span class="label">Mar del Ocaso</span></div>
+            <div class="pin" id="p24" style="top: 60%; left: 66%;"><div class="dot"></div><span class="label">Meseta Verde</span></div>
+            <div class="pin" id="p25" style="top: 60%; left: 50%;"><div class="dot"></div><span class="label">Playa Tranquila</span></div>
+            <div class="pin" id="p26" style="top: 78%; left: 81%;"><div class="dot"></div><span class="label">Tierra Salvaje</span></div>
+            <div class="pin" id="p27" style="top: 71%; left: 60%;"><div class="dot"></div><span class="label">Bosque Encerrado</span></div>
+            <div class="pin" id="p29" style="top: 85%; left: 59%;"><div class="dot"></div><span class="label">Orilla del Río</span></div>
+            <div class="pin" id="p30" style="top: 90%; left: 62%;"><div class="dot"></div><span class="label">Pequeña Playa</span></div>
+            <div class="pin" id="p31" style="top: 95%; left: 81%;"><div class="dot"></div><span class="label">Vado del Alba</span></div>
+            <div class="pin" id="p33" style="top: 76%; left: 42%;"><div class="dot"></div><span class="label">Vado Isleño</span></div>
+            <div class="pin" id="p34" style="top: 86%; left: 43%;"><div class="dot"></div><span class="label">Entre Montañas</span></div>
+        </div>
+    </div>
+
+    <button class="reset-icon" onclick="resetMap()" title="Reiniciar">🗑️</button>
+
+    <script>
+        const pins = document.querySelectorAll('.pin');
+        
+        // 1. CARGAR PROGRESO
+        function loadState() {
+            const saved = JSON.parse(localStorage.getItem('ff9_exact_map')) || [];
+            pins.forEach(p => {
+                if (saved.includes(p.id)) p.classList.add('found');
+            });
+        }
+        
+        // 2. GUARDAR PROGRESO
+        function saveState() {
+            const saved = [];
+            pins.forEach(p => {
+                if (p.classList.contains('found')) saved.push(p.id);
+            });
+            localStorage.setItem('ff9_exact_map', JSON.stringify(saved));
+        }
+        
+        // 3. CLIC EN PUNTOS
+        pins.forEach(p => {
+            p.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.classList.toggle('found');
+                saveState();
+            });
+        });
+        
+        // 4. RESET
+        function resetMap() {
+            if(confirm("¿Reiniciar mapa?")) {
+                pins.forEach(p => p.classList.remove('found'));
+                localStorage.removeItem('ff9_exact_map');
+            }
+        }
+        
+        loadState();
+    </script>
+</body>
+</html>
